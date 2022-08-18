@@ -1,0 +1,52 @@
+pkgname=(opendkim)
+pkgver=2.11.0
+pkgrel=1
+pkgdesc='DKIM filter software'
+arch=(x86_64)
+url='https://github.com/trusteddomainproject/OpenDKIM'
+license=(BSD Sendmail)
+groups=()
+depends=()
+makedepends=(
+    libtool
+    libmilter-dev
+    openssl-dev
+)
+options=()
+
+
+source=(
+    "https://github.com/trusteddomainproject/OpenDKIM/archive/refs/tags/${pkgver}-Beta2.tar.gz"
+    opendkim-service
+)
+
+sha256sums=(
+    cdbaf12b0d8f38c19d24b34db998ec156635b8d2f7c9f0245c061348250df6c8
+    e7640a02f4774edb5a7271ccae2273a3cd31e67a6c51b6a216872f07b972eea7
+)
+
+
+build() {
+    cd_unpacked_src
+    sed -i "/stdlib.h/s@\$@\n#include <stdio.h>@" libopendkim/util.c
+    autoreconf -i
+    LDFLAGS+=' --static' \
+        ./configure --prefix=/usr \
+        --disable-shared
+    make
+}
+
+check() {
+    cd_unpacked_src
+    MAKEFLAGS='' make check
+}
+
+package() {
+    pkgfiles=(
+        usr/sbin
+    )
+    std_package
+    install -d "${pkgdir}/etc/s6/services/available/opendkim"
+    install -m 0754 "${srcdir}/opendkim-service" \
+        "${pkgdir}/etc/s6/services/available/opendkim/run"
+}
