@@ -1,0 +1,43 @@
+pkgname=cronie
+pkgver=1.5.7
+pkgrel=1
+pkgdesc='A standard UNIX daemon crond'
+arch=(x86_64)
+url=https://github.com/cronie-crond/cronie
+license=(GPL2)
+groups=()
+depends=()
+makedepends=()
+options=(emptydirs)
+
+source=(
+    "https://github.com/cronie-crond/cronie/releases/download/cronie-${pkgver}/cronie-${pkgver}.tar.gz"
+    crond-service
+)
+
+sha256sums=(
+    538bcfaf2e986e5ae1edf6d1472a77ea8271d6a9005aee2497a9ed6e13320eb3
+    fd6e2ff2f82087e64103050315cd3d291adedc34322e23f3209e6e9bb4cc1fb4
+)
+
+
+build() {
+    cd_unpacked_src
+    CFLAGS+=' -static' \
+        ./configure \
+        --prefix=/usr \
+        --enable-syscrontab \
+        --sysconfdir=/etc \
+        --localstatedir=/var \
+        --disable-anacron
+    make V=1
+}
+
+package() {
+    cd_unpacked_src
+    make DESTDIR="$pkgdir" install
+    install -d "${pkgdir}/etc/cron.d"
+    cd "$pkgdir" || return 1
+    install -d etc/s6/services/available/crond
+    install -m 0754 "${srcdir}/crond-service" etc/s6/services/available/crond/run
+}
