@@ -1,0 +1,39 @@
+pkgname='bc'
+pkgver=1.07.1
+pkgrel=1
+pkgdesc='An arbitrary precision numeric processing language.'
+arch=(x86_64)
+url='http://www.gnu.org/software/bc/'
+license=(GPL2)
+groups=()
+depends=()
+makedepends=(readline-dev bison)
+options=()
+
+source=(
+    "http://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.gz"
+    fix-libmath_h
+)
+
+sha256sums=(
+    62adfca89b0a1c0164c2cdca59ca210c1d44c3ffc46daf9931cf4942664cb02a
+    71e09ee5ec520762caa3e85a8d5585d8479019305d852f70b77d30bfa502e748
+)
+
+
+build() {
+    cd_unpacked_src
+    install -m0755 "${srcdir}/fix-libmath_h" bc/fix-libmath_h
+    CFLAGS+=' -static' \
+    ./configure --prefix=/usr --with-readline \
+       --mandir=/usr/share/man \
+       --infodir=/usr/share/info
+    echo "MAKEINFO = :" >> doc/Makefile
+    make
+}
+
+package() {
+    cd_unpacked_src
+    make DESTDIR="$pkgdir" install
+    rm -rf "${pkgdir:?}/usr/share/info"
+}
