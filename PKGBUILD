@@ -1,3 +1,4 @@
+# needsrootforbuild
 pkgname=(sudo)
 pkgver=1.9.7p2
 pkgrel=1
