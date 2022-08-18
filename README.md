@@ -1,2 +1,2 @@
 # pkgs
-Packages for NinOS
+Packages for eweOS
