@@ -1,0 +1,48 @@
+pkgname=(execline execline-dev)
+pkgver=2.8.0.1
+pkgrel=1
+pkgdesc='a (non-interactive) scripting language.'
+arch=(x86_64)
+url='http://skarnet.org/software/execline/'
+license=(ISC)
+groups=()
+depends=()
+makedepends=(skalibs-dev)
+options=()
+source=(
+    "http://skarnet.org/software/execline/execline-${pkgver}.tar.gz"
+)
+
+sha256sums=(
+    a373f497d2335905d750e2f3be2ba47a028c11c4a7d5595dca9965c161e53aed
+)
+
+
+build() {
+    cd_unpacked_src
+    ./configure \
+      --prefix=/ \
+      --enable-static-libc
+    make
+}
+
+package_execline() {
+    pkgfiles=(
+        bin
+    )
+
+    cd_unpacked_src
+    make DESTDIR="${pkgdirbase}/dest" install
+    cd "${pkgdirbase}/dest" || return 1
+    mv lib/execline/libexecline.a lib
+    rm -rf lib/execline
+    package_defined_files
+}
+
+package_execline-dev() {
+    pkgfiles=(
+        include
+        lib
+    )
+    std_split_package
+}
