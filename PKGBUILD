@@ -1,0 +1,53 @@
+pkgname=(libffi libffi-dev)
+pkgver=3.3
+pkgrel=1
+pkgdesc='A portable Foregin Function Interface library.'
+arch=(x86_64)
+url='http://sourceware.org/libffi/'
+license=(BSD)
+groups=()
+depends=()
+makedepends=()
+options=()
+
+source=(
+    "ftp://sourceware.org/pub/libffi/libffi-${pkgver}.tar.gz"
+)
+sha256sums=(
+    72fba7922703ddfa7a028d513ac15a85c8d54c8d67f55fa5a4802885dc652056
+)
+
+
+build() {
+    cd_unpacked_src
+    CFLAGS+=" -fPIC" \
+      ./configure \
+      --prefix=/usr \
+      --enable-static \
+      --enable-shared
+    make
+}
+
+package_libffi() {
+    pkgfiles=(
+        usr/lib/libffi.so.*
+    )
+    depends=(
+        "ld-musl-$(arch).so.1"
+    )
+    provides=(
+        libffi.so.7
+    )
+    std_package
+}
+
+package_libffi-dev() {
+    pkgfiles=(
+        usr/include
+        usr/lib/*.a
+        usr/lib/*.so
+        usr/lib/pkgconfig
+    )
+    depends=("libffi=${pkgver}")
+    std_split_package
+}
