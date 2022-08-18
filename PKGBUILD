@@ -1,0 +1,72 @@
+pkgname=(sqlite libsqlite libsqlite-dev)
+pkgver=3.34.1
+_pkgaltver=3340100
+pkgrel=1
+pkgdesc='A self-contained embedded SQL database engine.'
+arch=('x86_64')
+url='https://sqlite.org/'
+license=(PublicDomain)
+groups=()
+depends=()
+makedepends=(readline-dev "ld-musl-$(arch).so.1")
+options=()
+
+
+source=(
+    "https://sqlite.org/2021/sqlite-autoconf-${_pkgaltver}.tar.gz"
+)
+
+sha256sums=(
+    2a3bca581117b3b88e5361d0ef3803ba6d8da604b1c1a47d902ef785c1b53e89
+)
+
+
+build() {
+    cd_unpacked_src
+    CFLAGS+=' -fPIC -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_COLUMN_METADATA=1'
+    CFLAGS+=' -DSQLITE_ENABLE_UNLOCK_NOTIFY=1 -DSQLITE_SECURE_DELETE=1'
+    export CFLAGS+=' -DSQLITE_ENABLE_DBSTAT_VTAB=1'
+    ./configure --prefix=/usr \
+        --enable-shared \
+        --enable-static
+    make
+}
+
+package_sqlite() {
+    pkgfiles=(
+        usr/bin
+        usr/share/man/man1
+    )
+    depends=(
+        "ld-musl-$(arch).so.1"
+        libreadline.so.8
+    )
+    std_package
+}
+
+package_libsqlite() {
+    pkgfiles=(
+        usr/lib/*.so.*
+    )
+    depends=(
+        "ld-musl-$(arch).so.1"
+    )
+    provides=(
+        libsqlite3.so.0
+    )
+    std_split_package
+}
+
+package_libsqlite-dev() {
+    pkgfiles=(
+        usr/include
+        usr/lib/*.a
+        usr/lib/*.so
+        usr/lib/pkgconfig
+    )
+    depends=(
+        "ld-musl-$(arch).so.1"
+        "libsqlite=${pkgver}"
+    )
+    std_split_package
+}
