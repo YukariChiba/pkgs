@@ -1,0 +1,63 @@
+pkgname=(
+    skalibs
+    skalibs-dev
+)
+pkgver=2.10.0.3
+pkgrel=1
+pkgdesc='A library suite supporting skarnet.org software.'
+arch=(x86_64)
+url=http://skarnet.org/software/skalibs/
+license=(ISC)
+groups=()
+depends=()
+makedepends=()
+options=()
+
+
+source=(
+    "http://skarnet.org/software/skalibs/skalibs-${pkgver}.tar.gz"
+)
+
+sha256sums=(
+    b780b0ae650dda0c3ec5f8975174998af2d24c2a2e2be669b1bab46e73b1464d
+)
+
+
+build() {
+    cd_unpacked_src
+    ./configure \
+      --prefix=/usr \
+      --dynlibdir=/lib \
+      --libdir=/lib \
+      --sysdepdir=/lib/skalibs/sysdeps \
+      --disable-ipv6 \
+      --enable-force-devr \
+      --enable-tai-clock
+    make
+}
+
+package_skalibs() {
+    pkgfiles=(
+        lib/libskarnet.so.*
+    )
+    depends=(
+        "ld-musl-$(arch).so.1"
+    )
+    provides=(
+        libskarnet.so.2.10
+    )
+    std_package
+}
+
+package_skalibs-dev() {
+    pkgfiles=(
+        usr/include/skalibs
+        lib/skalibs/sysdeps
+        lib/libskarnet.a
+        lib/libskarnet.so
+    )
+    depends=(
+        "skalibs=${pkgver}"
+    )
+    std_split_package
+}
