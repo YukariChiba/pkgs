@@ -1,0 +1,46 @@
+pkgname=mandoc
+pkgver=1.14.5
+pkgrel=1
+pkgdesc='UNIX manpage tools'
+arch=(x86_64)
+url='http://mdocml.bsd.lv/'
+license=(ISC)
+groups=()
+depends=()
+makedepends=(
+    zlib-dev
+)
+options=()
+
+source=(
+    "http://mdocml.bsd.lv/snapshots/${pkgname}-${pkgver}.tar.gz"
+    configure.local
+)
+
+sha256sums=(
+    8219b42cb56fc07b2aa660574e6211ac38eefdbf21f41b698d3348793ba5d8f7
+    6d697b3c0321fd1f08730e41b06c3d43bd39254be3cf41604e9e722370c28bf0
+)
+
+
+build() {
+    cd_unpacked_src
+    export CFLAGS+=' -static'
+    export LDFLAGS='-static -Wl,-static'
+    sed "/CFLAGS/s@\"\$@ $CFLAGS\"@g" "${srcdir}/configure.local" \
+        >configure.local
+    sed -i '/^CC=/s@.*@CC=cc@' configure
+    sed -i 's@dummy@&_err@' compat_err.c
+    sed -i 's@dummy@&_getline@' compat_getline.c
+    ./configure
+    make
+}
+
+package() {
+    pkgfiles=(
+        usr/bin
+        usr/sbin
+        usr/share/man
+    )
+    std_package
+}
