@@ -1,0 +1,38 @@
+pkgname=popt-dev
+pkgver=1.18
+pkgrel=1
+pkgdesc='A command line argument parser'
+arch=(x86_64)
+url='http://rpm5.org'
+license=(BSD)
+groups=()
+depends=()
+makedepends=()
+options=()
+
+source=(
+    "http://ftp.rpm.org/popt/releases/popt-1.x/popt-${pkgver}.tar.gz"
+)
+sha256sums=(
+    5159bc03a20b28ce363aa96765f37df99ea4d8850b1ece17d1e6ad5c24fdc5d1
+)
+
+
+build() {
+    cd "${srcdir}/popt-${pkgver}" || return 1
+    CFLAGS+=' -fPIC' \
+        ./configure --prefix=/usr \
+	    --enable-static \
+        --disable-shared
+    make
+}
+
+package() {
+    pkgfiles=(
+        usr/include
+        usr/lib/lib*.a
+        usr/lib/pkgconfig
+        usr/share/man/man3
+    )
+    std_package
+}
