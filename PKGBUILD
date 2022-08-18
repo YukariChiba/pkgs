@@ -1,0 +1,64 @@
+pkgname=(openssl openssl-dev)
+pkgver=1.1.1l
+pkgrel=1
+pkgdesc='a toolkit for the TLS and SSL protocols'
+arch=(x86_64)
+url='https://www.openssl.org'
+license=(BSD)
+groups=()
+depends=()
+makedepends=(perl zlib-dev)
+options=()
+
+
+source=(
+    "https://www.openssl.org/source/openssl-${pkgver}.tar.gz"
+)
+sha256sums=(
+    0b7a3e5e59c34827fe0c3a74b7ec8baef302b98fa80088d7f9153aa16fa76bd1
+)
+
+
+build() {
+    cd_unpacked_src
+    ./Configure \
+        --prefix=/usr \
+        --openssldir=/etc/ssl \
+        linux-x86_64-clang
+    make
+}
+
+package_openssl() {
+    depends=(
+        "ld-musl-$(arch).so.1"
+        libc.so
+    )
+    provides=(
+        libcrypto.so.1.1
+        libssl.so.1.1
+    )
+    pkgfiles=(
+        etc/ssl/*.cnf
+        usr/bin/openssl
+        usr/lib/engines-1.1
+        usr/lib/lib*.so.*
+        usr/share/man/man1
+        usr/share/man/man5
+        usr/share/man/man7
+    )
+    std_package
+}
+
+package_openssl-dev() {
+    depends=(
+        "openssl=${pkgver}"
+    )
+    pkgfiles=(
+        usr/include
+        usr/lib/lib*.a
+        usr/lib/lib*.so
+        usr/lib/pkgconfig
+        usr/share/man/man3
+    )
+    std_split_package
+}
