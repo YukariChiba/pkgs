@@ -47,6 +47,7 @@ package_libltdl() {
     )
     depends=(
         libc.so
+        ld-musl-$(arch).so.1
     )
     provides=(
         libltdl.so.7.3.1
