@@ -1,0 +1,54 @@
+pkgname=(perl)
+pkgver=5.32.1
+pkgrel=1
+pkgdesc='An API for writing text-based user interfaces.'
+arch=('x86_64')
+url='http://www.perl.org'
+license=('GPL2')
+groups=()
+depends=(musl)
+makedepends=(zlib-dev)
+options=()
+
+
+source=(
+    "http://www.cpan.org/src/5.0/perl-${pkgver}.tar.xz"
+)
+sha256sums=(
+    57cc47c735c8300a8ce2fa0643507b44c4ae59012bfdad0121313db639e02309
+)
+
+
+build() {
+    cd_unpacked_src
+    export BUILD_ZLIB=False
+    CFLAGS="$CFLAGS" ./configure.gnu \
+      -des -Dprefix=/usr \
+      -Dcc="cc -D_GNU_SOURCE" \
+      -Dvendorprefix=/usr \
+      -Dprivlib="/usr/lib/perl5/${pkgver}" \
+      -Darchlib="/usr/lib/perl5/${pkgver}/$(arch)-linux" \
+      -Dsitelib="/usr/lib/perl5/site_perl/${pkgver}" \
+      -Dvendorlib="/usr/lib/perl5/vendor_perl/${pkgver}" \
+      -Dvendorarch="/usr/lib/perl5/vendor_perl/${pkgver}/$(arch)-linux" \
+      -Dman1dir=/usr/share/man/man1 \
+      -Dman3dir=/usr/share/man/man3 \
+      -Dpager="/bin/less -I" \
+      -Dusethreads \
+      -Duseshrplib
+    make
+}
+
+check() {
+    cd_unpacked_src
+    # make test
+}
+
+package() {
+    pkgfiles=(
+        usr/bin
+        usr/lib
+        usr/share
+    )
+    std_package
+}
