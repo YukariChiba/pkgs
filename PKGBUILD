@@ -1,0 +1,51 @@
+pkgname=(sudo)
+pkgver=1.9.7p2
+pkgrel=1
+pkgdesc='Tool for delegating authority to users and groups.'
+arch=(x86_64)
+url='http://www.sudo.ws/'
+license=(BSD)
+groups=()
+depends=()
+makedepends=(
+    skalibs-dev
+    utmps-dev
+)
+options=(emptydirs)
+
+source=(
+    "http://www.sudo.ws/sudo/dist/sudo-${pkgver}.tar.gz"
+)
+
+sha256sums=(
+    28b5ee725dbf89a7852f42f309ca877d2810a9531b4eecfe59f3a84b6b4afca8
+)
+
+
+build() {
+    cd_unpacked_src
+    LIBS='-lutmps -lskarnet' \
+      ./configure \
+      --prefix=/usr \
+      --libexecdir=/usr/lib/sudo
+    make
+}
+
+package() {
+    options=(emptydirs)
+    backup=(etc/sudoers etc/sudo.conf)
+    pkgfiles=(
+        etc/sudo.conf
+        etc/sudoers
+        etc/sudoers.d
+        usr/bin
+        usr/lib
+        usr/sbin
+        usr/share/man
+    )
+    depends=(
+        "ld-musl-$(arch).so.1"
+        libskarnet.so.2.10
+    )
+    std_package
+}
