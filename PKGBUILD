@@ -6,7 +6,9 @@ arch=(x86_64)
 url='http://mdocml.bsd.lv/'
 license=(ISC)
 groups=()
-depends=()
+depends=(
+    ld-musl-$(arch).so.1
+)
 makedepends=(
     zlib-dev
 )
