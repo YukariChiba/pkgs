@@ -1,0 +1,56 @@
+pkgname=(libdevmapper libdevmapper-dev)
+pkgver=2.03.13
+pkgrel=1
+pkgdesc='The userspace device-mapper support library'
+arch=(x86_64)
+url='https://www.sourceware.org/lvm2/'
+license=(GPL2)
+groups=()
+depends=()
+makedepends=(libtool libaio-dev)
+options=()
+
+source=(
+    "ftp://sourceware.org/pub/lvm2/LVM2.${pkgver}.tgz"
+)
+sha256sums=(
+    296b9c8769e6b5b8e81128a1c0aeb58e6da1f0fcf97dba90ad3f005ece53a568
+)
+
+
+build() {
+    cd_unpacked_src
+    # musl does not support mallinfo
+    sed -i '/#ifndef VALGRIND_POOL/s@.*@#if !defined\(VALGRIND_POOL\) \&\& defined\(__GLIBC__\)@g' \
+        lib/mm/memlock.c
+    ./configure --prefix=/usr \
+      --enable-static_link
+    make SHELL=/bin/bash device-mapper
+}
+
+package_libdevmapper() {
+    pkgfiles=(
+        usr/lib/libdevmapper.so.*
+        usr/sbin
+    )
+    depends=(
+        libc.so
+        "ld-musl-$(arch).so.1"
+    )
+    provides=(
+        libdevmapper.so.1.02
+    )
+    cd_unpacked_src
+    make DESTDIR="${pkgdirbase}/dest" install_device-mapper
+    std_split_package
+}
+
+package_libdevmapper-dev() {
+    pkgfiles=(
+        usr/include
+        usr/lib/libdevmapper.so
+        usr/lib/libdevmapper.a
+    )
+    depends=(libdevmapper.so.1.02)
+    std_split_package
+}
