@@ -9,7 +9,6 @@ groups=()
 depends=()
 makedepends=()
 options=()
-changelog=ChangeLog
 source=(
     "http://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.xz"
 )
