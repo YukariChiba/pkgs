@@ -29,6 +29,7 @@ package_libaio() {
     )
     depends=(
         libc.so
+        ld-musl-$(arch).so.1
     )
     provides=(
         libaio.so.1.0.1
