@@ -1,0 +1,58 @@
+pkgname=(musl musl-dev)
+pkgver=1.2.2
+pkgrel=1
+pkgdesc='An implementation of the C/POSIX standard library.'
+arch=(x86_64)
+url='https://musl.libc.org'
+license=(LGPL BSD)
+groups=()
+depends=()
+makedepends=()
+options=()
+
+source=(
+    "http://www.etalabs.net/musl/releases/${pkgname[0]}-${pkgver}.tar.gz"
+)
+sha256sums=(
+    9b969322012d796dc23dda27a35866034fa67d8fb67e0e2c45c913c3d43219dd
+)
+
+build() {
+    cd_unpacked_src
+    unset CFLAGS CXXFLAGS
+    # Disable utmpx since utmps will provide it, avoid duplicate symbols in libs
+    # Also set default utmp paths to ones utmps will handle
+    sed -i "/utmpx.h/s@.*@#define __NEED_time_t\n#include <bits/alltypes.h>@" \
+        include/utmp.h
+    rm src/legacy/utmpx.c include/utmpx.h
+    ./configure --prefix=/usr \
+        --libdir=/lib \
+        --syslibdir=/lib
+    make
+}
+
+package_musl() {
+    pkgfiles=(
+        lib/libc.so
+        "lib/ld-musl-$(arch).so.1"
+    )
+    provides=(
+        "ld-musl-$(arch).so.1"
+        libc.so
+    )
+
+    std_package
+    install -d "${pkgdir}"/usr/bin
+    ln -sf /lib/libc.so "${pkgdir}"/usr/bin/ldd
+}
+
+package_musl-dev() {
+    pkgfiles=(
+        usr/include
+        lib/*.a
+        lib/*.o
+    )
+    depends=("musl=${pkgver}" linux-headers)
+    groups=(build-base)
+    std_split_package
+}
