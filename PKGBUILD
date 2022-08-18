@@ -1,0 +1,51 @@
+pkgname=syslinux
+pkgver=6.03
+pkgrel=1
+pkgdesc='Lightweight Linux bootloaders.'
+arch=(x86_64)
+url=http://syslinux.org/
+license=(BSD)
+groups=()
+depends=()
+makedepends=(
+    binutils
+    libuuid-dev
+    gcc
+    perl
+)
+options=()
+
+source=(
+    "https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/syslinux-${pkgver}.tar.xz"
+)
+
+sha256sums=(
+    26d3986d2bea109d5dc0e4f8c4822a459276cf021125e8c9f23c3cca5d8c850e
+)
+
+
+build() {
+    cd_unpacked_src
+    export PATH="/opt/binutils/bin:${PATH}"
+    sed -i -e 's@malign@falign@g' mk/*
+    sed -i "/types.h/s@.*@#include <sys/sysmacros.h>\n&@" extlinux/main.c
+    MAKEFLAGS='' make efi64 bios installer
+}
+
+package() {
+    pkgfiles=(
+        usr/sbin/
+        usr/bin
+        usr/share
+    )
+    depends=(
+        "ld-musl-$(arch).so.1"
+    )
+    cd_unpacked_src
+    MAKEFLAGS='' make INSTALLROOT="${pkgdirbase}/dest" efi64 bios install
+    cd "${pkgdirbase}/dest" || return 1
+    install -d usr/sbin
+    mv sbin/extlinux usr/sbin/
+    find . -not -type d \( -name "*.a" -o -name "*.h" \) -delete
+    package_defined_files
+}
