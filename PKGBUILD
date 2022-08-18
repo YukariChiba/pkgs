@@ -1,0 +1,51 @@
+pkgname=(pcre libpcre-dev)
+pkgver=8.45
+pkgrel=1
+pkgdesc='Perl Compatible Regular Expressions'
+arch=(x86_64)
+url='http://pcre.org'
+license=(GPL)
+groups=()
+depends=()
+makedepends=()
+options=()
+
+source=(
+    "https://ftp.pcre.org/pub/pcre/pcre-${pkgver}.tar.gz"
+)
+sha256sums=(
+    4e6ce03e0336e8b4a3d6c2b70b1c5e18590a5673a98186da90d4f33c23defc09
+)
+
+
+build() {
+    cd_unpacked_src
+    ./configure --prefix=/usr \
+        --disable-shared \
+        --enable-static \
+        --enable-utf8 \
+        --enable-unicode-properties
+    make
+}
+
+package_pcre() {
+    pkgfiles=(
+        usr/bin
+    )
+    depends=(
+        "ld-musl-$(arch).so.1"
+    )
+    std_package
+    rm "${pkgdir}/usr/bin/pcre-config"
+}
+
+package_libpcre-dev() {
+    pkgfiles=(
+        usr/bin/pcre-config
+        usr/include
+        usr/lib/*.a
+        usr/lib/pkgconfig
+    )
+    depends=()
+    std_split_package
+}
