@@ -38,6 +38,7 @@ package_readline() {
     )
     depends=(
         libc.so
+	"ld-musl-$(arch).so.1"
     )
     provides=(
         libreadline.so.8
