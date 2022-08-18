@@ -1,0 +1,68 @@
+pkgname=git
+pkgver=2.33.0
+pkgrel=1
+pkgdesc='A distributed version control system'
+arch=('x86_64')
+url='http://git-scm.com/'
+license=('GPL2')
+groups=()
+depends=(
+    perl
+    python
+)
+makedepends=(
+    libcurl-dev
+    openssl-dev
+    perl
+    python
+    zlib-dev
+)
+options=()
+
+
+source=(
+    "https://www.kernel.org/pub/software/scm/git/git-${pkgver}.tar.xz"
+)
+sha256sums=(
+    bf3c6ab5f82e072aad4768f647cfb1ef60aece39855f83f080f9c0222dd20c4f
+)
+
+
+build() {
+    cd_unpacked_src
+    LIBS='-lz -lssl -lcrypto' \
+    LDFLAGS='-static -Wl,-static -lssl -lcrypto -lz' \
+    ./configure \
+      --prefix=/usr \
+      --libexecdir=/usr/lib \
+      --with-curl \
+      --with-openssl \
+      --without-tcltk \
+      --with-zlib=/usr/lib \
+      --with-editor=/usr/bin/vim \
+      --with-pager=/bin/more \
+      --with-perl=/usr/bin/perl \
+      --with-python=/usr/bin/python \
+      --with-shell=/bin/sh
+    make V=1 NO_MSGFMT=1 NO_GETTEXT=1
+}
+
+package() {
+    pkgfiles=(
+        usr/bin
+        usr/lib/git-core
+        usr/share/git-core
+    )
+    rmfiles=(
+        usr/bin/git-cvsserver
+        usr/lib/git-core/git-cvs*
+        usr/lib/git-core/git-svn
+    )
+
+    cd_unpacked_src
+    make V=1 NO_MSGFMT=1 NO_GETTEXT=1 DESTDIR="${pkgdirbase}/dest" install
+    cd "${pkgdirbase}/dest" || return 1
+    package_defined_files
+    cd "$pkgdir" || return 1
+    find ${rmfiles[@]} -delete
+}
