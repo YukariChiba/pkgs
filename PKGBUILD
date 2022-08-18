@@ -1,0 +1,44 @@
+pkgname=(e2fsprogs)
+pkgver=1.46.3
+pkgrel=1
+pkgdesc='Filesystem utilities for ext2, ext3 and ext4.'
+arch=(x86_64)
+url=http://e2fsprogs.sourceforge.net/
+license=(GPL)
+groups=()
+depends=()
+makedepends=()
+options=()
+
+source=(
+    "https://www.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v${pkgver}/e2fsprogs-${pkgver}.tar.xz"
+)
+
+sha256sums=(
+    86d1580facdd49f2e0e6b027e26b1e6c48af538762dc40aeed2a87153c1f11b7
+)
+
+build() {
+    cd_unpacked_src
+    LDFLAGS='--static' \
+        ac_cv_c_compiler_gnu=no \
+        ac_cv_lib_dl_dlopen=no \
+        ac_cv_path_mkdir=/bin/mkdir \
+        ./configure --prefix=/usr \
+            --sysconfdir=/etc \
+            --disable-shared
+    make V=1
+}
+
+package() {
+    pkgfiles=(
+        usr/bin
+        etc/mke2fs.conf
+        usr/sbin
+        usr/share/man/man1
+        usr/share/man/man5
+        usr/share/man/man8
+    )
+    std_package
+    rm "${pkgdir}/usr/sbin/blkid" "${pkgdir}/usr/share/man/man8/blkid.8"
+}
