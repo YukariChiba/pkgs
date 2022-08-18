@@ -1,0 +1,42 @@
+pkgname=bash
+pkgver=5.1.8
+pkgrel=1
+pkgdesc='A full-featured sh-compatible shell.'
+arch=(x86_64)
+url='http://www.gnu.org/software/bash'
+license=(GPL3)
+groups=()
+depends=()
+makedepends=(libncurses-dev readline-dev)
+options=()
+source=(
+    "http://ftp.gnu.org/gnu/bash/${pkgname}-${pkgver}.tar.gz"
+    bashrc
+)
+
+sha256sums=(
+    0cfb5c9bb1a29f800a97bd242d19511c997a1013815b805e0fdd32214113d6be
+    69ba8775a43461ef74f814e9d32a52fb481f27b2c0666ab145dcf1ea748acc13
+)
+
+
+build() {
+    cd_unpacked_src
+    ./configure --prefix=/ \
+        --enable-static-link \
+        --mandir=/usr/share/man \
+        --without-bash-malloc \
+        --with-installed-readline
+    make
+}
+
+package() {
+    pkgfiles=(
+        bin/bash
+    )
+    cd_unpacked_src
+    install -d "${pkgdir}/etc" "${pkgdir}/usr/share/man/man1"
+    install -m 0644 "${srcdir}/bashrc" "${pkgdir}/etc/"
+    install -m 0644 doc/bash.1 "${pkgdir}/usr/share/man/man1/"
+    std_package
+}
