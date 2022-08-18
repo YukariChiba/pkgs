@@ -1,0 +1,47 @@
+pkgname=(libmilter-dev)
+pkgver=8.17.1
+pkgrel=1
+pkgdesc="Sendmail's milter library"
+arch=(x86_64)
+url='http://sendmail.org'
+license=(Sendmail)
+groups=()
+depends=()
+makedepends=()
+options=()
+
+
+source=(
+    "ftp://ftp.sendmail.org/pub/sendmail/sendmail.${pkgver}.tar.gz"
+    "https://git.alpinelinux.org/aports/plain/main/libmilter/default-pthread-stacksize.patch"
+)
+
+sha256sums=(
+    04bc76b6c886e6d111be7fd8daa32b8ce00128a288b6b52e067bc29f3854a6e6
+    d04f6f653c64857843f84a76991cdc3cbbff84093e43cc0baf5485b2f726056c
+)
+
+
+build() {
+    cd_unpacked_src
+    patch -Np1 -i "${srcdir}/default-pthread-stacksize.patch"
+    sed -i '/SM_CONF_SYS_CDEFS_H/s@1@0@' include/sm/os/sm_os_linux.h
+    cat >> devtools/Site/site.config.m4 <<-EOF
+		dnl getipnodebyname/getipnodebyaddr is deprecated and not part of musl libc
+		APPENDDEF(\`conf_libmilter_ENVDEF',\`-DNEEDSGETIPNODE=1')
+        APPENDDEF(\`confENVDEF',\`$CFLAGS')
+	EOF
+    cd libmilter || return 1
+    MAKEFLAGS='' ./Build
+}
+
+package() {
+    pkgfiles=(
+        usr/include
+        usr/lib/lib*.a
+    )
+    cd_unpacked_src
+    install -d "${pkgdirbase}/dest/usr/lib"
+    make -C libmilter DESTDIR="${pkgdirbase}/dest" install
+    std_split_package
+}
